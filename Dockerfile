@@ -1,10 +1,16 @@
 # Build stage
 FROM maven:3.9.6-eclipse-temurin-17 AS build
-COPY . .
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Run stage
-FROM eclipse-temurin:17-jdk-alpine
-COPY --from=build /target/*.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+
+ENV SERVER_PORT=8085
+EXPOSE 8085
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
